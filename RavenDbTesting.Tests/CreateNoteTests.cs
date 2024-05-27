@@ -4,7 +4,7 @@ using RavenDbTesting.Tests.TestDrivers;
 
 namespace RavenDbTesting.Tests;
 
-public class CreateNoteTests : SingleUserTestDriver
+public class CreateNoteTests : UserTestDriver
 {
     [Fact]
     public async Task AddNote_IsStoredToDatabase()
