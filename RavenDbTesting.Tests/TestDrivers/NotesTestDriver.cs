@@ -1,5 +1,7 @@
 using Raven.Client.Documents;
+using RavenDbTesting.Data.Indexes;
 using RavenDbTesting.Data.Model;
+using RavenDbTesting.Data.Setup;
 
 namespace RavenDbTesting.Tests.TestDrivers;
 
@@ -36,6 +38,8 @@ public class NotesTestDriver : UserTestDriver
 
     protected override void SetupDatabase(IDocumentStore documentStore)
     {
+        documentStore.DeployIndexes();
+
         using var session = documentStore.OpenSession();
         session.Store(MainUser);
         session.Store(OtherUser);
