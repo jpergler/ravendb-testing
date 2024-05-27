@@ -40,4 +40,17 @@ public class CreateNoteTests : UserTestDriver
         var savedNote = await session.LoadAsync<Note>(id);
         Assert.Equal(MainUser.Id, savedNote.OwnerId);
     }
+
+    [Fact]
+    public async Task AddNote_ChecksThatUserExists()
+    {
+        // Arrange
+        var sut = new NoteService(DocumentStore, NonExistingUserProvider);
+
+        // Act
+        async Task Act() => await sut.CreateNoteAsync("Test Note", "This is a test note.");
+
+        // Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(Act);
+    }
 }

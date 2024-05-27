@@ -1,8 +1,8 @@
-using Moq;
 using Raven.Client.Documents;
 using Raven.TestDriver;
 using RavenDbTesting.Data.Model;
 using RavenDbTesting.Logic.Infrastructure;
+using RavenDbTesting.Tests.Infrastructure;
 
 namespace RavenDbTesting.Tests.TestDrivers;
 
@@ -22,17 +22,22 @@ public class UserTestDriver : RavenTestDriver
         LastName = "Fu"
     };
 
-    protected readonly ICurrentUserProvider MainUserProvider;
+    protected readonly ICurrentUserProvider MainUserProvider = new TestCurrentUserProvider(MainUser.Id);
+    protected readonly ICurrentUserProvider OtherUserProvider = new TestCurrentUserProvider(OtherUser.Id);
+    protected readonly ICurrentUserProvider NonExistingUserProvider = new TestCurrentUserProvider("users/non-existing");
 
     protected readonly IDocumentStore DocumentStore;
 
     protected UserTestDriver()
     {
-        var mainUserProviderMock = new Mock<ICurrentUserProvider>();
-        mainUserProviderMock.Setup(x => x.CurrentUserId).Returns(MainUser.Id);
-        mainUserProviderMock.Setup(x => x.IsAuthenticated).Returns(true);
-        MainUserProvider = mainUserProviderMock.Object;
-
         DocumentStore = GetDocumentStore();
+    }
+
+    protected override void SetupDatabase(IDocumentStore documentStore)
+    {
+        using var session = documentStore.OpenSession();
+        session.Store(MainUser);
+        session.Store(OtherUser);
+        session.SaveChanges();
     }
 }

@@ -2,6 +2,7 @@
 using RavenDbTesting.Data;
 using RavenDbTesting.Data.Model;
 using RavenDbTesting.Logic.Dto;
+using RavenDbTesting.Logic.Extensions;
 using RavenDbTesting.Logic.Infrastructure;
 
 namespace RavenDbTesting.Logic;
@@ -10,17 +11,18 @@ public class NoteService(IDocumentStore documentStore, ICurrentUserProvider curr
 {
     public async Task<string> CreateNoteAsync(string title, string content)
     {
-        if (!currentUserProvider.IsAuthenticated) throw new InvalidOperationException("You must be authenticated to create a note.");
+        using var session = documentStore.OpenAsyncSession();
+
+        await session.EnsureUserExists(currentUserProvider.RequiredUserId);
 
         var note = new Note
         {
             Id = IdHelper.CreateByRavenDb,
             Title = title,
             Content = content,
-            OwnerId = currentUserProvider.CurrentUserId
+            OwnerId = currentUserProvider.RequiredUserId
         };
 
-        using var session = documentStore.OpenAsyncSession();
         await session.StoreAsync(note);
         await session.SaveChangesAsync();
         return note.Id;
@@ -30,7 +32,7 @@ public class NoteService(IDocumentStore documentStore, ICurrentUserProvider curr
     {
         using var session = documentStore.OpenSession();
         var notes = session.Query<Note>()
-                           .Where(note => note.OwnerId == currentUserProvider.CurrentUserId)
+                           .Where(note => note.OwnerId == currentUserProvider.UserId)
                            .ProjectInto<NoteDto>()
                            .ToList();
 
@@ -42,7 +44,7 @@ public class NoteService(IDocumentStore documentStore, ICurrentUserProvider curr
         using var session = documentStore.OpenSession();
         var note = session.Load<Note>(id);
 
-        if (note is null || note.OwnerId != currentUserProvider.CurrentUserId) return null;
+        if (note is null || note.OwnerId != currentUserProvider.UserId) return null;
 
         return new NoteDto(note.Id, note.Title, note.Content, note.OwnerId);
     }
