@@ -53,4 +53,17 @@ public class CreateNoteTests : UserTestDriver
         // Assert
         await Assert.ThrowsAsync<InvalidOperationException>(Act);
     }
+    
+    [Fact]
+    public async Task AddNote_Fails_WhenUserNotAuthenticated()
+    {
+        // Arrange
+        var sut = new NoteService(DocumentStore, NotAuthenticatedUserProvider);
+
+        // Act
+        async Task Act() => await sut.CreateNoteAsync("Test Note", "This is a test note.");
+
+        // Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(Act);
+    }
 }

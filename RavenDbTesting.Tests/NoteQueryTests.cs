@@ -1,4 +1,5 @@
 using RavenDbTesting.Logic;
+using RavenDbTesting.Logic.Dto;
 using RavenDbTesting.Tests.TestDrivers;
 
 namespace RavenDbTesting.Tests;
@@ -66,5 +67,31 @@ public class NoteQueryTests : NotesTestDriver
 
         // Assert
         Assert.Null(note);
+    }
+    
+    [Fact]
+    public void GetNotes_Fails_WhenUserNotAuthenticated()
+    {
+        // Arrange
+        var sut = new NoteService(DocumentStore, NotAuthenticatedUserProvider);
+
+        // Act
+        ICollection<NoteDto> GetNotes() => sut.GetNotes();
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(GetNotes);
+    }
+    
+    [Fact]
+    public void GetNote_Fails_WhenUserNotAuthenticated()
+    {
+        // Arrange
+        var sut = new NoteService(DocumentStore, NotAuthenticatedUserProvider);
+
+        // Act
+        NoteDto? GetNote() => sut.GetNote(MainUserNote1.Id);
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(GetNote);
     }
 }

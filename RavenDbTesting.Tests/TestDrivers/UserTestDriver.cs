@@ -25,6 +25,7 @@ public class UserTestDriver : RavenTestDriver
     protected readonly ICurrentUserProvider MainUserProvider = new TestCurrentUserProvider(MainUser.Id);
     protected readonly ICurrentUserProvider OtherUserProvider = new TestCurrentUserProvider(OtherUser.Id);
     protected readonly ICurrentUserProvider NonExistingUserProvider = new TestCurrentUserProvider("users/non-existing");
+    protected readonly ICurrentUserProvider NotAuthenticatedUserProvider = new TestCurrentUserProvider(null);
 
     protected readonly IDocumentStore DocumentStore;
 

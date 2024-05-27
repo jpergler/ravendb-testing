@@ -30,9 +30,11 @@ public class NoteService(IDocumentStore documentStore, ICurrentUserProvider curr
 
     public ICollection<NoteDto> GetNotes()
     {
+        var userId = currentUserProvider.RequiredUserId;
+
         using var session = documentStore.OpenSession();
         var notes = session.Query<Note>()
-                           .Where(note => note.OwnerId == currentUserProvider.UserId)
+                           .Where(note => note.OwnerId == userId)
                            .ProjectInto<NoteDto>()
                            .ToList();
 
@@ -44,7 +46,7 @@ public class NoteService(IDocumentStore documentStore, ICurrentUserProvider curr
         using var session = documentStore.OpenSession();
         var note = session.Load<Note>(id);
 
-        if (note is null || note.OwnerId != currentUserProvider.UserId) return null;
+        if (note is null || note.OwnerId != currentUserProvider.RequiredUserId) return null;
 
         return new NoteDto(note.Id, note.Title, note.Content, note.OwnerId);
     }
