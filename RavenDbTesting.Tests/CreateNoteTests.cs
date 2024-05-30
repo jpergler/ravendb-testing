@@ -53,7 +53,7 @@ public class CreateNoteTests : UserTestDriver
         // Assert
         await Assert.ThrowsAsync<InvalidOperationException>(Act);
     }
-    
+
     [Fact]
     public async Task AddNote_Fails_WhenUserNotAuthenticated()
     {

@@ -23,8 +23,18 @@ public class NoteService(IDocumentStore documentStore, ICurrentUserProvider curr
             Content = content,
             OwnerId = currentUserProvider.RequiredUserId
         };
-
         await session.StoreAsync(note);
+
+        var noteEvent = new NoteEvent
+        {
+            Id = IdHelper.CreateByRavenDb,
+            NoteId = note.Id,
+            UserId = currentUserProvider.RequiredUserId,
+            Type = NoteEventType.Created,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        await session.StoreAsync(noteEvent);
+
         await session.SaveChangesAsync();
         return note.Id;
     }
